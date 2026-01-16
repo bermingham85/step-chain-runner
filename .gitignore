@@ -120,3 +120,7 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 >>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
+-e 
+# Environment files
+*.env
+*.env.*
