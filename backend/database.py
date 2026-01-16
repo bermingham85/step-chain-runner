@@ -9,7 +9,11 @@ Base = declarative_base()
 
 class Run(Base):
     __tablename__ = "runs"
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
     run_id = Column(String, primary_key=True)
     problem = Column(Text, nullable=False)
     status = Column(String, nullable=False, default="queued")  # queued, running, completed, failed
@@ -23,7 +27,11 @@ class Run(Base):
 
 class Event(Base):
     __tablename__ = "events"
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
     id = Column(Integer, primary_key=True, autoincrement=True)
     run_id = Column(String, nullable=False, index=True)
     ts = Column(DateTime, nullable=False, default=datetime.utcnow)
