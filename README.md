@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Here are your Instructions
-=======
 # Step-Chain Runner
 
 A step-by-step problem solver powered by LangGraph and Anthropic Claude. The system breaks down complex problems into manageable steps, executes them sequentially with verification, and streams progress in real-time.
@@ -117,7 +114,7 @@ Stream real-time events via Server-Sent Events (SSE).
 ## Architecture
 
 - **Backend**: FastAPI (Python 3.11) with LangGraph for step execution
-- **Frontend**: Next.js 14 (App Router) with TypeScript and Tailwind CSS
+- **Frontend**: React with Create React App, Tailwind CSS, and shadcn/ui components
 - **Database**: SQLite for persistence
 - **Streaming**: SSE for real-time updates
 
@@ -133,11 +130,22 @@ uvicorn main:app --reload
 ### Frontend Only
 ```bash
 cd frontend
-npm install
-npm run dev
+yarn install
+yarn start
 ```
+
+## Frontend UI Rebuild (Completed)
+
+The frontend has been completely rebuilt with a modern, responsive UI featuring:
+- Problem input section with large textarea and run button
+- Real-time progress indicator with status badges
+- Current step panel showing active step details
+- Live event log with timestamps and emoji icons
+- Final output section with copy-to-clipboard button
+- Comprehensive error handling
+
+All components are built with React, Tailwind CSS, and shadcn/ui, providing a polished user experience for watching the AI solve problems step-by-step.
 
 ## License
 
 MIT
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
