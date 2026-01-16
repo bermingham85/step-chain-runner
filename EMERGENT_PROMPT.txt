@@ -1,0 +1,17 @@
+==========================================
+COPY THIS PROMPT TO EMERGENT
+==========================================
+
+Please work on this GitHub repository:
+https://github.com/bermingham85/step-chain-runner
+
+Read and complete the task described in Issue #1:
+https://github.com/bermingham85/step-chain-runner/issues/1
+
+Key points:
+- Read EMERGENT_FRONTEND_TASK.md for complete specifications
+- Only modify frontend/ directory
+- Do NOT touch backend code
+- Push changes when complete
+
+==========================================
