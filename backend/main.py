@@ -52,19 +52,11 @@ async def create_run(
 ):
     """
     Create a new problem-solving run.
-<<<<<<< HEAD
-
-    The run will be queued and processed asynchronously.
-    """
-    run_id = str(uuid.uuid4())
-
-=======
     
     The run will be queued and processed asynchronously.
     """
     run_id = str(uuid.uuid4())
     
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
     # Create run in database
     run = Run(
         run_id=run_id,
@@ -73,28 +65,17 @@ async def create_run(
     )
     session.add(run)
     await session.commit()
-<<<<<<< HEAD
-
-=======
     
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
     # Start background task
     async def run_task():
         async for session_inner in get_session():
             runner = StepChainRunner(session_inner)
             await runner.run(run_id, request.problem)
             break
-<<<<<<< HEAD
-
-    task = asyncio.create_task(run_task())
-    background_tasks[run_id] = task
-
-=======
     
     task = asyncio.create_task(run_task())
     background_tasks[run_id] = task
     
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
     return CreateRunResponse(run_id=run_id)
 
 @app.get("/api/runs/{run_id}", response_model=RunStatus)
@@ -109,17 +90,10 @@ async def get_run_status(
         select(Run).where(Run.run_id == run_id)
     )
     run = result.scalar_one_or_none()
-<<<<<<< HEAD
-
-    if not run:
-        raise HTTPException(status_code=404, detail="Run not found")
-
-=======
     
     if not run:
         raise HTTPException(status_code=404, detail="Run not found")
     
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
     return RunStatus(
         run_id=run.run_id,
         status=run.status,
@@ -138,11 +112,7 @@ async def stream_run_events(
 ):
     """
     Stream real-time events for a run via Server-Sent Events (SSE).
-<<<<<<< HEAD
-
-=======
     
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
     Event types:
     - plan_created: Initial plan generated
     - step_started: Step execution begins
@@ -152,37 +122,23 @@ async def stream_run_events(
     - run_completed: Run finished successfully
     - run_failed: Run encountered an error
     """
-<<<<<<< HEAD
-
-=======
     
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
     async def event_generator():
         # Check if run exists
         result = await session.execute(
             select(Run).where(Run.run_id == run_id)
         )
         run = result.scalar_one_or_none()
-<<<<<<< HEAD
-
-=======
         
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
         if not run:
             yield {
                 "event": "error",
                 "data": '{"error": "Run not found"}'
             }
             return
-<<<<<<< HEAD
-
-        last_event_id = 0
-
-=======
         
         last_event_id = 0
         
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
         while True:
             # Fetch new events
             result = await session.execute(
@@ -192,11 +148,7 @@ async def stream_run_events(
                 .order_by(DBEvent.id)
             )
             events = result.scalars().all()
-<<<<<<< HEAD
-
-=======
             
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
             for event in events:
                 import json
                 event_data = {
@@ -209,26 +161,12 @@ async def stream_run_events(
                     "data": json.dumps(event_data)
                 }
                 last_event_id = event.id
-<<<<<<< HEAD
-
-=======
             
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
             # Check if run is complete
             result = await session.execute(
                 select(Run).where(Run.run_id == run_id)
             )
             run = result.scalar_one()
-<<<<<<< HEAD
-
-            if run.status in ["completed", "failed"]:
-                # Send final status and close connection
-                break
-
-            # Wait before polling again
-            await asyncio.sleep(0.5)
-
-=======
             
             if run.status in ["completed", "failed"]:
                 # Send final status and close connection
@@ -237,7 +175,6 @@ async def stream_run_events(
             # Wait before polling again
             await asyncio.sleep(0.5)
     
->>>>>>> cd880af29a59d474c32616ae99d9ef61c23e18cb
     return EventSourceResponse(event_generator())
 
 @app.get("/health")
