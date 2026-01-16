@@ -1,56 +1,360 @@
-/* Custom styles for Step-Chain Runner */
+/* Chain-Link Inspired Design */
 
+:root {
+  --chain-orange: #ff6b35;
+  --chain-red: #ff4757;
+  --chain-yellow: #ffa502;
+  --chain-green: #26de81;
+  --chain-blue: #4bcffa;
+  --chain-cyan: #00d2ff;
+  --chain-dark: #0a0e27;
+  --chain-darker: #050814;
+  --glow-orange: rgba(255, 107, 53, 0.5);
+  --glow-blue: rgba(75, 207, 250, 0.5);
+  --glow-green: rgba(38, 222, 129, 0.5);
+}
+
+body {
+  background: var(--chain-darker) !important;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(75, 207, 250, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(38, 222, 129, 0.05) 0%, transparent 50%);
+  color: #e0e0e0 !important;
+}
+
+/* Background Image */
 .App {
   min-height: 100vh;
+  background-image: url('https://customer-assets.emergentagent.com/job_chain-ui-update/artifacts/da2xtghb_langchain%20background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  position: relative;
 }
 
-/* Smooth animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.App::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(5, 8, 20, 0.85);
+  backdrop-filter: blur(2px);
+  z-index: 0;
 }
 
-/* Custom scrollbar for event log */
+.App > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Chain-link styled cards */
+.card {
+  background: linear-gradient(135deg, rgba(15, 20, 45, 0.95) 0%, rgba(10, 14, 39, 0.98) 100%) !important;
+  border: 2px solid transparent !important;
+  border-image: linear-gradient(135deg, var(--chain-orange), var(--chain-blue), var(--chain-green)) 1 !important;
+  box-shadow: 
+    0 0 30px rgba(255, 107, 53, 0.1),
+    0 0 60px rgba(75, 207, 250, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, var(--chain-orange), var(--chain-yellow), var(--chain-green), var(--chain-blue));
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  filter: blur(20px);
+}
+
+.card:hover::before {
+  opacity: 0.3;
+}
+
+/* Chain-link buttons */
+button {
+  position: relative;
+  background: linear-gradient(135deg, var(--chain-orange) 0%, var(--chain-red) 50%, var(--chain-orange) 100%) !important;
+  border: none !important;
+  box-shadow: 
+    0 0 20px var(--glow-orange),
+    0 4px 15px rgba(255, 107, 53, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 
+    0 0 40px var(--glow-orange),
+    0 6px 25px rgba(255, 107, 53, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+button:disabled {
+  background: linear-gradient(135deg, rgba(100, 100, 100, 0.5) 0%, rgba(70, 70, 70, 0.5) 100%) !important;
+  box-shadow: none !important;
+  opacity: 0.5;
+}
+
+/* Glowing text */
+h1, h2, h3, .card-title {
+  background: linear-gradient(135deg, var(--chain-orange), var(--chain-yellow), var(--chain-green), var(--chain-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  text-shadow: 0 0 30px var(--glow-orange);
+  animation: gradientShift 8s ease infinite;
+  background-size: 200% 200%;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Progress bar with chain-link glow */
+.progress {
+  background: rgba(30, 30, 50, 0.5) !important;
+  border: 1px solid rgba(255, 107, 53, 0.2);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+  overflow: visible !important;
+}
+
+.progress > div {
+  background: linear-gradient(90deg, var(--chain-orange), var(--chain-yellow), var(--chain-green)) !important;
+  box-shadow: 
+    0 0 20px var(--glow-orange),
+    0 0 40px var(--glow-green);
+  position: relative;
+  overflow: visible;
+}
+
+.progress > div::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  box-shadow: 
+    0 0 15px var(--chain-yellow),
+    0 0 30px var(--chain-orange);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: translateY(-50%) scale(1); opacity: 1; }
+  50% { transform: translateY(-50%) scale(1.3); opacity: 0.8; }
+}
+
+/* Badges with chain-link style */
+.badge {
+  background: linear-gradient(135deg, var(--chain-orange), var(--chain-yellow)) !important;
+  border: 1px solid var(--chain-orange);
+  box-shadow: 0 0 15px var(--glow-orange);
+  font-weight: 600;
+  padding: 6px 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.badge-success,
+[data-state="completed"] {
+  background: linear-gradient(135deg, var(--chain-green), var(--chain-cyan)) !important;
+  box-shadow: 0 0 15px var(--glow-green);
+}
+
+/* Textarea with chain border */
+textarea {
+  background: rgba(10, 14, 39, 0.8) !important;
+  border: 2px solid transparent !important;
+  border-image: linear-gradient(135deg, var(--chain-orange), var(--chain-blue)) 1 !important;
+  color: #e0e0e0 !important;
+  box-shadow: 
+    inset 0 2px 10px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(255, 107, 53, 0.1);
+  transition: all 0.3s ease;
+}
+
+textarea:focus {
+  outline: none !important;
+  box-shadow: 
+    inset 0 2px 10px rgba(0, 0, 0, 0.5),
+    0 0 30px var(--glow-orange),
+    0 0 50px var(--glow-blue) !important;
+  border-image: linear-gradient(135deg, var(--chain-orange), var(--chain-yellow), var(--chain-green), var(--chain-blue)) 1 !important;
+}
+
+textarea::placeholder {
+  color: rgba(224, 224, 224, 0.4);
+}
+
+/* Event log with glowing links */
+.event-log-item {
+  background: rgba(15, 20, 45, 0.6) !important;
+  border-left: 3px solid var(--chain-orange);
+  box-shadow: -3px 0 15px var(--glow-orange);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.event-log-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.event-log-item:hover::before {
+  left: 100%;
+}
+
+.event-log-item:hover {
+  background: rgba(20, 25, 50, 0.8) !important;
+  border-left-color: var(--chain-yellow);
+  box-shadow: -3px 0 20px var(--glow-orange), 0 0 20px var(--glow-blue);
+  transform: translateX(5px);
+}
+
+/* Current step panel with chain glow */
+.current-step-panel {
+  border-left: 4px solid var(--chain-blue) !important;
+  background: rgba(15, 20, 45, 0.8) !important;
+  box-shadow: 
+    -4px 0 20px var(--glow-blue),
+    0 0 30px rgba(75, 207, 250, 0.1);
+  animation: stepPulse 2s ease-in-out infinite;
+}
+
+@keyframes stepPulse {
+  0%, 100% { box-shadow: -4px 0 20px var(--glow-blue), 0 0 30px rgba(75, 207, 250, 0.1); }
+  50% { box-shadow: -4px 0 30px var(--glow-blue), 0 0 50px rgba(75, 207, 250, 0.2); }
+}
+
+/* Final output with success glow */
+.final-output-card {
+  border-left: 4px solid var(--chain-green) !important;
+  background: rgba(15, 30, 20, 0.8) !important;
+  box-shadow: 
+    -4px 0 30px var(--glow-green),
+    0 0 40px rgba(38, 222, 129, 0.15);
+}
+
+/* Scrollbar styling */
 .overflow-y-auto::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 .overflow-y-auto::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
+  background: rgba(10, 14, 39, 0.5);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 107, 53, 0.2);
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: linear-gradient(180deg, var(--chain-orange), var(--chain-yellow));
+  border-radius: 10px;
+  box-shadow: 0 0 10px var(--glow-orange);
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: linear-gradient(180deg, var(--chain-yellow), var(--chain-green));
+  box-shadow: 0 0 15px var(--glow-green);
 }
 
-/* Badge variants */
-.badge-success {
-  background-color: #10b981;
-  color: white;
+/* Alert styling */
+.alert {
+  background: rgba(30, 15, 15, 0.9) !important;
+  border: 2px solid var(--chain-red) !important;
+  box-shadow: 0 0 30px rgba(255, 71, 87, 0.3);
 }
 
-/* Pulse animation for running state */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+/* Icons glow */
+svg {
+  filter: drop-shadow(0 0 3px currentColor);
 }
 
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* Particle effect overlay */
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-10px) translateX(5px); }
+  50% { transform: translateY(-5px) translateX(-5px); }
+  75% { transform: translateY(-15px) translateX(3px); }
+}
+
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--chain-cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--chain-cyan);
+  animation: float 6s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+/* Smooth transitions */
+* {
+  transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+}
+
+button, .card, .event-log-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Text shadows for better readability */
+p, span, div {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Loading animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+  filter: drop-shadow(0 0 5px var(--chain-orange));
 }

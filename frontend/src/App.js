@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, Loader2, Copy, CheckCheck, Play, AlertCircle } from "lucide-react";
 
@@ -182,55 +181,57 @@ function App() {
   const getEventIcon = (type) => {
     switch (type) {
       case "plan_created":
-        return "📋";
+        return "🔗";
       case "step_started":
-        return "▶️";
+        return "⛓️";
       case "step_output":
-        return "💬";
+        return "💫";
       case "verify_pass":
-        return "✅";
+        return "✨";
       case "verify_fail":
-        return "❌";
-      case "run_completed":
-        return "🎉";
-      case "run_failed":
         return "💥";
+      case "run_completed":
+        return "🎯";
+      case "run_failed":
+        return "⚠️";
       default:
-        return "📌";
+        return "🔗";
     }
   };
 
   const getEventLabel = (type) => {
     const labels = {
-      plan_created: "Plan Created",
-      step_started: "Step Started",
-      step_output: "Step Output",
-      verify_pass: "Verification Passed",
-      verify_fail: "Verification Failed",
-      run_completed: "Run Completed",
-      run_failed: "Run Failed",
+      plan_created: "Chain Forged",
+      step_started: "Link Activated",
+      step_output: "Data Flowing",
+      verify_pass: "Link Verified",
+      verify_fail: "Link Broken",
+      run_completed: "Chain Complete",
+      run_failed: "Chain Failed",
     };
     return labels[type] || type;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="App min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">
-            Step-Chain Runner
+          <h1 className="text-5xl font-bold mb-3">
+            ⛓️ Step-Chain Runner
           </h1>
-          <p className="text-slate-600">
-            AI-powered step-by-step problem solver
+          <p className="text-xl" style={{ color: '#a0a0a0', textShadow: '0 0 10px rgba(255,107,53,0.3)' }}>
+            AI-powered problem solver • Powered by LangChain
           </p>
         </div>
 
         {/* Problem Input Section */}
-        <Card className="mb-6 shadow-lg">
+        <Card className="card mb-6 shadow-2xl">
           <CardHeader>
-            <CardTitle>Problem Input</CardTitle>
-            <CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <span>🔗</span> Problem Input
+            </CardTitle>
+            <CardDescription style={{ color: '#b0b0b0' }}>
               Describe the problem you want to solve
             </CardDescription>
           </CardHeader>
@@ -239,24 +240,25 @@ function App() {
               value={problem}
               onChange={(e) => setProblem(e.target.value)}
               placeholder="Describe the problem you want to solve..."
-              className="w-full min-h-[120px] p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+              className="w-full min-h-[120px] p-4 rounded-lg resize-y font-mono"
               disabled={isRunning}
+              style={{ fontSize: '15px' }}
             />
             <Button
               onClick={handleRun}
               disabled={isRunning || !problem.trim()}
-              className="mt-4 w-full md:w-auto"
+              className="mt-4 w-full md:w-auto text-white font-bold"
               size="lg"
             >
               {isRunning ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Running...
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Forging Chain...
                 </>
               ) : (
                 <>
-                  <Play className="mr-2 h-4 w-4" />
-                  Run
+                  <Play className="mr-2 h-5 w-5" />
+                  Forge Chain
                 </>
               )}
             </Button>
@@ -265,26 +267,21 @@ function App() {
 
         {/* Progress Indicator */}
         {runStatus && (
-          <Card className="mb-6 shadow-lg">
+          <Card className="card mb-6 shadow-2xl">
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
                   <Badge
-                    variant={
-                      runStatus.status === "completed"
-                        ? "success"
-                        : runStatus.status === "failed"
-                        ? "destructive"
-                        : "default"
-                    }
+                    variant={runStatus.status === "completed" ? "success" : "default"}
+                    data-state={runStatus.status}
                   >
-                    {runStatus.status}
+                    ⛓️ {runStatus.status.toUpperCase()}
                   </Badge>
-                  <span className="text-sm text-slate-600">
-                    Step {runStatus.current_step_index} of {runStatus.total_steps}
+                  <span className="text-sm font-semibold" style={{ color: '#ffa502' }}>
+                    Link {runStatus.current_step_index} of {runStatus.total_steps}
                   </span>
                 </div>
-                <span className="text-sm font-semibold text-slate-700">
+                <span className="text-lg font-bold" style={{ color: '#4bcffa' }}>
                   {runStatus.total_steps > 0
                     ? Math.round(
                         (runStatus.current_step_index / runStatus.total_steps) * 100
@@ -299,7 +296,7 @@ function App() {
                     ? (runStatus.current_step_index / runStatus.total_steps) * 100
                     : 0
                 }
-                className="h-2"
+                className="h-3"
               />
             </CardContent>
           </Card>
@@ -307,28 +304,33 @@ function App() {
 
         {/* Current Step Panel */}
         {currentStep && (
-          <Card className="mb-6 shadow-lg border-l-4 border-l-blue-500">
+          <Card className="card current-step-panel mb-6 shadow-2xl">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">
-                  Step {currentStep.step_number}
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <span>⛓️</span> Link {currentStep.step_number}
                 </CardTitle>
                 {currentStep.verification && (
                   <div className="flex items-center gap-1">
                     {currentStep.verification === "pass" ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      <CheckCircle2 className="h-6 w-6" style={{ color: '#26de81' }} />
                     ) : (
-                      <XCircle className="h-5 w-5 text-red-600" />
+                      <XCircle className="h-6 w-6" style={{ color: '#ff4757' }} />
                     )}
                   </div>
                 )}
               </div>
-              <CardDescription>{currentStep.description}</CardDescription>
+              <CardDescription style={{ color: '#b0b0b0' }}>
+                {currentStep.description}
+              </CardDescription>
             </CardHeader>
             {currentStep.output && (
               <CardContent>
-                <div className="bg-slate-50 p-4 rounded-md border border-slate-200">
-                  <p className="text-sm text-slate-700 whitespace-pre-wrap">
+                <div className="p-4 rounded-md" style={{ 
+                  background: 'rgba(10, 14, 39, 0.6)',
+                  border: '1px solid rgba(75, 207, 250, 0.3)'
+                }}>
+                  <p className="text-sm whitespace-pre-wrap" style={{ color: '#d0d0d0' }}>
                     {currentStep.output}
                   </p>
                 </div>
@@ -340,11 +342,13 @@ function App() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Live Event Log */}
           {events.length > 0 && (
-            <Card className="shadow-lg">
+            <Card className="card shadow-2xl">
               <CardHeader>
-                <CardTitle>Live Event Log</CardTitle>
-                <CardDescription>
-                  Real-time updates from the execution
+                <CardTitle className="flex items-center gap-2">
+                  <span>📡</span> Live Chain Events
+                </CardTitle>
+                <CardDescription style={{ color: '#b0b0b0' }}>
+                  Real-time updates from execution
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -352,27 +356,27 @@ function App() {
                   {events.map((event, index) => (
                     <div
                       key={index}
-                      className="flex gap-3 p-3 bg-slate-50 rounded-md border border-slate-200 hover:bg-slate-100 transition-colors"
+                      className="event-log-item flex gap-3 p-3 rounded-md"
                     >
                       <div className="text-2xl flex-shrink-0">
                         {getEventIcon(event.type)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-sm text-slate-900">
+                          <span className="font-semibold text-sm" style={{ color: '#ffa502' }}>
                             {getEventLabel(event.type)}
                           </span>
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs" style={{ color: '#888' }}>
                             {formatTimestamp(event.ts)}
                           </span>
                         </div>
-                        <div className="text-sm text-slate-600">
+                        <div className="text-sm" style={{ color: '#c0c0c0' }}>
                           {event.type === "plan_created" && (
-                            <span>Created plan with {event.data.total_steps} steps</span>
+                            <span>Forged chain with {event.data.total_steps} links</span>
                           )}
                           {event.type === "step_started" && (
                             <span>
-                              Step {event.data.step_number}: {event.data.description}
+                              Link {event.data.step_number}: {event.data.description}
                             </span>
                           )}
                           {event.type === "step_output" && (
@@ -381,15 +385,15 @@ function App() {
                             </span>
                           )}
                           {event.type === "verify_pass" && (
-                            <span>Step {event.data.step_number} verified successfully</span>
+                            <span>Link {event.data.step_number} verified successfully</span>
                           )}
                           {event.type === "verify_fail" && (
                             <span>
-                              Step {event.data.step_number} verification failed
+                              Link {event.data.step_number} verification failed
                             </span>
                           )}
                           {event.type === "run_completed" && (
-                            <span>Run completed successfully!</span>
+                            <span>Chain completed successfully!</span>
                           )}
                           {event.type === "run_failed" && (
                             <span>Error: {event.data.error}</span>
@@ -406,18 +410,23 @@ function App() {
 
           {/* Final Output Section */}
           {finalOutput && (
-            <Card className="shadow-lg border-l-4 border-l-green-500">
+            <Card className="card final-output-card shadow-2xl">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    Final Output
+                    <CheckCircle2 className="h-6 w-6" style={{ color: '#26de81' }} />
+                    <span>Chain Complete</span>
                   </CardTitle>
                   <Button
                     onClick={copyToClipboard}
                     variant="outline"
                     size="sm"
                     className="gap-2"
+                    style={{
+                      background: 'rgba(38, 222, 129, 0.2)',
+                      borderColor: '#26de81',
+                      color: '#26de81'
+                    }}
                   >
                     {copied ? (
                       <>
@@ -432,11 +441,16 @@ function App() {
                     )}
                   </Button>
                 </div>
-                <CardDescription>The solution to your problem</CardDescription>
+                <CardDescription style={{ color: '#b0b0b0' }}>
+                  The solution to your problem
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="bg-green-50 p-4 rounded-md border border-green-200">
-                  <p className="text-slate-800 whitespace-pre-wrap leading-relaxed">
+                <div className="p-4 rounded-md" style={{
+                  background: 'rgba(15, 30, 20, 0.6)',
+                  border: '2px solid rgba(38, 222, 129, 0.3)'
+                }}>
+                  <p className="whitespace-pre-wrap leading-relaxed" style={{ color: '#e0e0e0' }}>
                     {finalOutput}
                   </p>
                 </div>
@@ -447,9 +461,9 @@ function App() {
 
         {/* Error Display */}
         {error && (
-          <Alert variant="destructive" className="mt-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+          <Alert variant="destructive" className="alert mt-6">
+            <AlertCircle className="h-5 w-5" />
+            <AlertDescription style={{ color: '#ffcccc' }}>{error}</AlertDescription>
           </Alert>
         )}
       </div>
