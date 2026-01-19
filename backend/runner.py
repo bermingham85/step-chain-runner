@@ -33,9 +33,9 @@ class StepChainRunner:
         if not anthropic_key:
             raise ValueError("Anthropic API key is required")
         
-        # Use latest Claude 3.5 Sonnet model (June 2024 release)
-        # Note: claude-3-5-sonnet-20240620 is the correct stable version
-        model_name = os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20240620")
+        # Use latest Claude Sonnet 4.5 model (September 2025 release)
+        # Tested and verified working: claude-sonnet-4-5-20250929
+        model_name = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929")
         
         self.model = ChatAnthropic(
             model=model_name,
