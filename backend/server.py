@@ -1,9 +1,14 @@
 import asyncio
 import uuid
 import logging
+import os
 from datetime import datetime
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
 from fastapi import FastAPI, Depends, HTTPException, Header, BackgroundTasks
+
+# Load environment variables from .env file
+load_dotenv()
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
