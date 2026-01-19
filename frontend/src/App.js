@@ -12,6 +12,8 @@ const API = `${BACKEND_URL}/api`;
 
 function App() {
   const [problem, setProblem] = useState("");
+  const [apiKey, setApiKey] = useState(localStorage.getItem("anthropic_api_key") || "");
+  const [showApiKey, setShowApiKey] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [runId, setRunId] = useState(null);
   const [runStatus, setRunStatus] = useState(null);
@@ -23,6 +25,13 @@ function App() {
   const [copied, setCopied] = useState(false);
   const eventsEndRef = useRef(null);
   const eventSourceRef = useRef(null);
+
+  // Save API key to localStorage when it changes
+  useEffect(() => {
+    if (apiKey) {
+      localStorage.setItem("anthropic_api_key", apiKey);
+    }
+  }, [apiKey]);
 
   // Auto-scroll to latest event
   useEffect(() => {
@@ -42,6 +51,11 @@ function App() {
 
   const handleRun = async () => {
     if (!problem.trim()) return;
+    
+    if (!apiKey.trim()) {
+      setError("Please enter your Anthropic API key");
+      return;
+    }
 
     // Reset state
     setIsRunning(true);
@@ -59,6 +73,7 @@ function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-Anthropic-Key": apiKey,
         },
         body: JSON.stringify({ problem }),
       });
@@ -225,6 +240,53 @@ function App() {
           </p>
         </div>
 
+        {/* API Key Input */}
+        <Card className="card mb-6 shadow-2xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span>🔑</span> API Configuration
+            </CardTitle>
+            <CardDescription style={{ color: '#b0b0b0' }}>
+              Enter your Anthropic Claude API key
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-3">
+              <div className="flex-1 relative">
+                <input
+                  type={showApiKey ? "text" : "password"}
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="sk-ant-api03-..."
+                  className="w-full p-3 rounded-lg font-mono text-sm"
+                  disabled={isRunning}
+                  style={{
+                    background: 'rgba(10, 14, 39, 0.8)',
+                    border: '2px solid transparent',
+                    borderImage: 'linear-gradient(135deg, var(--chain-orange), var(--chain-blue)) 1',
+                    color: '#e0e0e0'
+                  }}
+                />
+              </div>
+              <Button
+                onClick={() => setShowApiKey(!showApiKey)}
+                variant="outline"
+                size="lg"
+                style={{
+                  background: 'rgba(75, 207, 250, 0.2)',
+                  borderColor: '#4bcffa',
+                  color: '#4bcffa'
+                }}
+              >
+                {showApiKey ? "Hide" : "Show"}
+              </Button>
+            </div>
+            <p className="text-xs mt-2" style={{ color: '#888' }}>
+              Get your API key from <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#4bcffa', textDecoration: 'underline' }}>console.anthropic.com</a>
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Problem Input Section */}
         <Card className="card mb-6 shadow-2xl">
           <CardHeader>
@@ -246,7 +308,7 @@ function App() {
             />
             <Button
               onClick={handleRun}
-              disabled={isRunning || !problem.trim()}
+              disabled={isRunning || !problem.trim() || !apiKey.trim()}
               className="mt-4 w-full md:w-auto text-white font-bold"
               size="lg"
             >
