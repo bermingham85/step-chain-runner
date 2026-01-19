@@ -68,10 +68,17 @@ async def create_run(
     
     # Start background task
     async def run_task():
-        async for session_inner in get_session():
-            runner = StepChainRunner(session_inner)
-            await runner.run(run_id, request.problem)
-            break
+        try:
+            async for session_inner in get_session():
+                print(f"[RUN {run_id}] Starting runner...")
+                runner = StepChainRunner(session_inner)
+                await runner.run(run_id, request.problem)
+                print(f"[RUN {run_id}] Runner completed")
+                break
+        except Exception as e:
+            print(f"[RUN {run_id}] ERROR: {e}")
+            import traceback
+            traceback.print_exc()
     
     task = asyncio.create_task(run_task())
     background_tasks[run_id] = task
