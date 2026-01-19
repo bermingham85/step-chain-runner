@@ -1,0 +1,48 @@
+Build a webhook-driven receipt ingestion and validation pipeline.
+
+The system should:
+- Receive WellyBox webhook payloads (JSON) via HTTP endpoint
+- Handle both single receipts and batch receipts in one webhook
+- Dynamically discover all fields in the webhook (don't assume fixed schema)
+- Create or open a Google Sheet in a specific Drive folder
+- Write header row on first use, then append each receipt as a new row
+- If new fields appear in later webhooks, expand the header automatically
+- Always store the full raw webhook JSON in a column called raw_payload_json
+
+Metadata columns to add:
+- received_at_utc (ISO timestamp)
+- source (always "wellybox")
+- receipt_id (extract from webhook or generate from hash)
+- receipt_hash (SHA256 of raw receipt JSON)
+- processing_status (set to "RECEIVED" initially)
+
+OCR comparison:
+- Accept a second OCR output (OCR2) for the same receipt
+- Normalize both WellyBox and OCR2 into a canonical schema:
+  supplier_name, invoice_number, invoice_date, currency, total, vat, subtotal, payment_method, line_items_count
+- Compare the two sources field by field
+- If differences exceed tolerance (total off by more than 0.02, date mismatch, supplier mismatch, missing invoice_number):
+  set processing_status = HOLD_REVIEW
+  store a diff_summary JSON
+- If matching within tolerance:
+  set processing_status = READY_FOR_REVIEW
+
+Human review:
+- Add columns: reviewer_decision, reviewer_notes, reviewer_corrected_fields_json, reviewed_at_utc
+- Reviewers can update rows (PASS/FAIL/EDITED) without breaking future appends
+
+Deliverables:
+- Complete runnable Python FastAPI webhook server
+- Google Sheets integration using service account
+- Dynamic field discovery and header expansion logic
+- OCR comparison with tolerance rules
+- Test payload examples
+- curl commands for testing
+- Setup instructions for Google Cloud service account
+
+Constraints:
+- Must be copy/paste runnable
+- Must not require paid services beyond Google APIs
+- Must never lose data (raw_payload_json always written even on errors)
+- Minimal dependencies
+- Clear function boundaries for later n8n integration

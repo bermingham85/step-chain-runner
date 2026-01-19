@@ -1,0 +1,42 @@
+name: wellybox-receipt-intake
+goal: Process WellyBox receipts with OCR validation and human review workflow
+inputs:
+  - WellyBox webhook JSON payloads
+  - OCR2 JSON for comparison
+outputs:
+  - Google Sheets with dynamic columns
+  - Processing status field
+integrations:
+  - Google Drive/Sheets API
+  - FastAPI webhook server
+  - Service account authentication
+deterministic_rules:
+  - Total amount must match within 0.02 tolerance
+  - Invoice date must match exactly (no fuzzy dates)
+  - Supplier name fuzzy match threshold >0.8
+  - Invoice number must be present in both sources
+  - Hash-based receipt_id generation when not provided
+llm_tasks:
+  - Field mapping suggestions for unknown receipt formats
+  - Human-readable diff summary generation
+  - Review prompt generation
+human_review_requirements: Hold receipts with OCR mismatches for manual review with PASS/FAIL/EDITED decisions
+storage_requirements:
+  - Store raw webhook payload in raw_payload_json column
+  - Persist all metadata (timestamps, hashes, source)
+  - Dynamic header expansion for new fields
+  - Preserve reviewer decisions without breaking appends
+error_handling_requirements:
+  - Never drop a webhook; append minimal row if parsing fails
+  - Log all errors with full webhook context
+  - Continue processing batch even if one receipt fails
+token_output_constraints: Keep code modular with separate files (max 250 lines per file)
+deliverables:
+  - Runnable FastAPI application with uvicorn
+  - Google Sheets integration with service account setup guide
+  - Dynamic field discovery and header management
+  - OCR comparison engine with tolerance rules
+  - Test payload examples (single and batch)
+  - curl test commands
+  - README with complete setup instructions
+  - requirements.txt with minimal dependencies
