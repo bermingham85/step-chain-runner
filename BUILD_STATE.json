@@ -1,0 +1,37 @@
+{
+  "project_name": "step-chain-runner",
+  "current_step": "STEP_00",
+  "completed_steps": [],
+  "config": {
+    "root_path": "C:\\Users\\bermi\\Projects\\step-chain-runner",
+    "backend_port": 8000,
+    "frontend_port": 3000,
+    "anthropic_api_key": "CONFIGURED",
+    "anthropic_model": "claude-3-5-sonnet-20241022",
+    "github_repo": "https://github.com/bermingham85/step-chain-runner",
+    "default_branch": "master"
+  },
+  "artifacts": {
+    "backend_complete": true,
+    "frontend_minimal": true,
+    "docker_ready": true,
+    "github_pushed": true
+  },
+  "definition_of_done": {
+    "1_input_working": false,
+    "2_post_creates_run": false,
+    "3_sse_streaming": false,
+    "4_progress_bar": false,
+    "5_current_step_panel": false,
+    "6_event_log": false,
+    "7_final_output_section": false,
+    "8_copy_button": false,
+    "9_error_display": false,
+    "10_responsive_ui": false,
+    "11_docker_builds": true,
+    "12_end_to_end_working": false
+  },
+  "errors": [],
+  "last_updated": "2026-01-19T07:30:00Z",
+  "next_step_prompt": "Execute STEP_00: Review current state and plan frontend rebuild"
+}
