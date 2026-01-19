@@ -26,11 +26,16 @@ class StepChainState(TypedDict):
 class StepChainRunner:
     """Runs a problem-solving process step-by-step using LangGraph."""
     
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession, api_key: str = None):
         self.session = session
+        # Use provided API key or fall back to environment variable
+        anthropic_key = api_key or os.getenv("ANTHROPIC_API_KEY")
+        if not anthropic_key:
+            raise ValueError("Anthropic API key is required")
+        
         self.model = ChatAnthropic(
             model=os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022"),
-            api_key=os.getenv("ANTHROPIC_API_KEY")
+            api_key=anthropic_key
         )
     
     async def emit_event(self, run_id: str, event_type: str, data: dict):
