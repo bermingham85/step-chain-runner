@@ -155,7 +155,7 @@ All 12 items from EMERGENT_FRONTEND_TASK.md are complete:
 - ✅ All components render properly
 
 **Test URL:**
-https://chain-ui-update.preview.emergentagent.com
+https://graphforge-1.preview.emergentagent.com
 
 ## 📌 Notes
 

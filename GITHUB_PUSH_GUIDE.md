@@ -115,7 +115,7 @@ After pushing, verify on GitHub:
 After successful push:
 
 1. ✅ Close GitHub Issue #1 (Frontend UI Rebuild)
-2. ✅ Add comment with link to live demo: https://chain-ui-update.preview.emergentagent.com
+2. ✅ Add comment with link to live demo: https://graphforge-1.preview.emergentagent.com
 3. ✅ Tag the release (optional): `git tag v1.0.0 && git push origin v1.0.0`
 
 ## Troubleshooting

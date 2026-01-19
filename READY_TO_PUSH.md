@@ -274,7 +274,7 @@ Follow instructions in `GITHUB_PUSH_GUIDE.md`
 ## 🔗 Links
 
 - **GitHub Repo**: https://github.com/bermingham85/step-chain-runner
-- **Live Demo**: https://chain-ui-update.preview.emergentagent.com
+- **Live Demo**: https://graphforge-1.preview.emergentagent.com
 - **Issue #1**: https://github.com/bermingham85/step-chain-runner/issues/1
 
 ---

@@ -87,7 +87,7 @@ After pushing, verify on GitHub:
 ## Live Application
 
 The completed application is running at:
-https://chain-ui-update.preview.emergentagent.com
+https://graphforge-1.preview.emergentagent.com
 
 All features are working:
 - ✅ Problem input
