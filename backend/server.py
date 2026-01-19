@@ -1,19 +1,21 @@
 import asyncio
 import uuid
+import logging
 from datetime import datetime
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, HTTPException, Header
+from fastapi import FastAPI, Depends, HTTPException, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
-from database import init_db, get_session, Run, Event as DBEvent
+from database import init_db, get_session, async_session_maker, Run, Event as DBEvent
 from models import CreateRunRequest, CreateRunResponse, RunStatus
 from runner import StepChainRunner
 
-# Background task tracking
-background_tasks = {}
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,9 +47,38 @@ async def root():
         "docs": "/docs"
     }
 
+async def run_chain(run_id: str, problem: str, api_key: str = None):
+    """Background task to run the chain."""
+    logger.info(f"[RUN {run_id}] Starting background task...")
+    try:
+        async with async_session_maker() as session:
+            logger.info(f"[RUN {run_id}] Session created, initializing runner...")
+            runner = StepChainRunner(session, api_key=api_key)
+            logger.info(f"[RUN {run_id}] Runner initialized, starting execution...")
+            await runner.run(run_id, problem)
+            logger.info(f"[RUN {run_id}] Runner completed successfully")
+    except Exception as e:
+        logger.error(f"[RUN {run_id}] ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        # Try to update run status to failed
+        try:
+            async with async_session_maker() as session:
+                result = await session.execute(
+                    select(Run).where(Run.run_id == run_id)
+                )
+                run = result.scalar_one_or_none()
+                if run:
+                    run.status = "failed"
+                    run.error = str(e)
+                    await session.commit()
+        except Exception as e2:
+            logger.error(f"[RUN {run_id}] Failed to update error status: {e2}")
+
 @app.post("/api/runs", response_model=CreateRunResponse)
 async def create_run(
     request: CreateRunRequest,
+    bg_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
     x_anthropic_key: str = Header(None, alias="X-Anthropic-Key")
 ):
@@ -58,6 +89,7 @@ async def create_run(
     API key can be provided via X-Anthropic-Key header or will use environment variable.
     """
     run_id = str(uuid.uuid4())
+    logger.info(f"[RUN {run_id}] Creating new run for problem: {request.problem[:50]}...")
 
     # Create run in database
     run = Run(
@@ -67,16 +99,11 @@ async def create_run(
     )
     session.add(run)
     await session.commit()
+    logger.info(f"[RUN {run_id}] Run created in database")
 
-    # Start background task
-    async def run_task():
-        async for session_inner in get_session():
-            runner = StepChainRunner(session_inner, api_key=x_anthropic_key)
-            await runner.run(run_id, request.problem)
-            break
-
-    task = asyncio.create_task(run_task())
-    background_tasks[run_id] = task
+    # Schedule background task with FastAPI's BackgroundTasks
+    bg_tasks.add_task(run_chain, run_id, request.problem, x_anthropic_key)
+    logger.info(f"[RUN {run_id}] Background task scheduled")
 
     return CreateRunResponse(run_id=run_id)
 
@@ -109,8 +136,7 @@ async def get_run_status(
 
 @app.get("/api/runs/{run_id}/events")
 async def stream_run_events(
-    run_id: str,
-    session: AsyncSession = Depends(get_session)
+    run_id: str
 ):
     """
     Stream real-time events for a run via Server-Sent Events (SSE).
@@ -126,56 +152,61 @@ async def stream_run_events(
     """
 
     async def event_generator():
-        # Check if run exists
-        result = await session.execute(
-            select(Run).where(Run.run_id == run_id)
-        )
-        run = result.scalar_one_or_none()
-
-        if not run:
-            yield {
-                "event": "error",
-                "data": '{"error": "Run not found"}'
-            }
-            return
-
-        last_event_id = 0
-
-        while True:
-            # Fetch new events
-            result = await session.execute(
-                select(DBEvent)
-                .where(DBEvent.run_id == run_id)
-                .where(DBEvent.id > last_event_id)
-                .order_by(DBEvent.id)
-            )
-            events = result.scalars().all()
-
-            for event in events:
-                import json
-                event_data = {
-                    "ts": event.ts.isoformat(),
-                    "type": event.type,
-                    "data": event.data
-                }
-                yield {
-                    "event": "message",
-                    "data": json.dumps(event_data)
-                }
-                last_event_id = event.id
-
-            # Check if run is complete
+        # Use a new session for the generator to avoid session conflicts
+        async with async_session_maker() as session:
+            # Check if run exists
             result = await session.execute(
                 select(Run).where(Run.run_id == run_id)
             )
-            run = result.scalar_one()
+            run = result.scalar_one_or_none()
 
-            if run.status in ["completed", "failed"]:
-                # Send final status and close connection
-                break
+            if not run:
+                yield {
+                    "event": "error",
+                    "data": '{"error": "Run not found"}'
+                }
+                return
 
-            # Wait before polling again
-            await asyncio.sleep(0.5)
+            last_event_id = 0
+            timeout_counter = 0
+            max_timeout = 300  # 5 minutes max wait
+
+            while timeout_counter < max_timeout:
+                # Fetch new events
+                result = await session.execute(
+                    select(DBEvent)
+                    .where(DBEvent.run_id == run_id)
+                    .where(DBEvent.id > last_event_id)
+                    .order_by(DBEvent.id)
+                )
+                events = result.scalars().all()
+
+                for event in events:
+                    import json
+                    event_data = {
+                        "ts": event.ts.isoformat(),
+                        "type": event.type,
+                        "data": event.data
+                    }
+                    yield {
+                        "event": "message",
+                        "data": json.dumps(event_data)
+                    }
+                    last_event_id = event.id
+
+                # Check if run is complete
+                result = await session.execute(
+                    select(Run).where(Run.run_id == run_id)
+                )
+                run = result.scalar_one()
+
+                if run.status in ["completed", "failed"]:
+                    # Send final status and close connection
+                    break
+
+                # Wait before polling again
+                await asyncio.sleep(0.5)
+                timeout_counter += 0.5
 
     return EventSourceResponse(event_generator())
 
