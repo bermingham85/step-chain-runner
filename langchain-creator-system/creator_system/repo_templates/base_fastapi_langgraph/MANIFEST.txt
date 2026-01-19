@@ -1,0 +1,11 @@
+# Standard LangGraph Project Template
+# This directory contains template files for generated repos
+
+# File manifest for base_fastapi_langgraph template:
+# - main.py (FastAPI server)
+# - graph.py (LangGraph workflow)
+# - state.py (Pydantic state model)
+# - nodes/ (workflow nodes)
+# - adapters/ (external integrations)
+# - tests/ (pytest tests)
+# - examples/ (test payloads)
