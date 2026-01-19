@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import "@/App.css";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
+import "./App.css";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./components/ui/card";
+import { Button } from "./components/ui/button";
+import { Alert, AlertDescription } from "./components/ui/alert";
+import { Progress } from "./components/ui/progress";
+import { Badge } from "./components/ui/badge";
 import { CheckCircle2, XCircle, Loader2, Copy, CheckCheck, Play, AlertCircle } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
