@@ -51,11 +51,6 @@ function App() {
 
   const handleRun = async () => {
     if (!problem.trim()) return;
-    
-    if (!apiKey.trim()) {
-      setError("Please enter your Anthropic API key");
-      return;
-    }
 
     // Reset state
     setIsRunning(true);
@@ -69,12 +64,18 @@ function App() {
 
     try {
       // Create run
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      
+      // Only send API key header if provided by user
+      if (apiKey.trim()) {
+        headers["X-Anthropic-Key"] = apiKey;
+      }
+      
       const response = await fetch(`${API}/runs`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Anthropic-Key": apiKey,
-        },
+        headers: headers,
         body: JSON.stringify({ problem }),
       });
 
@@ -244,10 +245,10 @@ function App() {
         <Card className="card mb-6 shadow-2xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span>🔑</span> API Configuration
+              <span>🔑</span> API Configuration (Optional)
             </CardTitle>
             <CardDescription style={{ color: '#b0b0b0' }}>
-              Enter your Anthropic Claude API key
+              Enter your Anthropic Claude API key (or leave blank to use server default)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -308,7 +309,7 @@ function App() {
             />
             <Button
               onClick={handleRun}
-              disabled={isRunning || !problem.trim() || !apiKey.trim()}
+              disabled={isRunning || !problem.trim()}
               className="mt-4 w-full md:w-auto text-white font-bold"
               size="lg"
             >
