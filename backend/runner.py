@@ -35,7 +35,7 @@ class StepChainRunner:
         
         self.model = ChatAnthropic(
             model=os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022"),
-            api_key=anthropic_key
+            anthropic_api_key=anthropic_key
         )
     
     async def emit_event(self, run_id: str, event_type: str, data: dict):
