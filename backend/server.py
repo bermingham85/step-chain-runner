@@ -2,7 +2,7 @@ import asyncio
 import uuid
 from datetime import datetime
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -48,12 +48,14 @@ async def root():
 @app.post("/api/runs", response_model=CreateRunResponse)
 async def create_run(
     request: CreateRunRequest,
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
+    x_anthropic_key: str = Header(None, alias="X-Anthropic-Key")
 ):
     """
     Create a new problem-solving run.
 
     The run will be queued and processed asynchronously.
+    API key can be provided via X-Anthropic-Key header or will use environment variable.
     """
     run_id = str(uuid.uuid4())
 
@@ -69,7 +71,7 @@ async def create_run(
     # Start background task
     async def run_task():
         async for session_inner in get_session():
-            runner = StepChainRunner(session_inner)
+            runner = StepChainRunner(session_inner, api_key=x_anthropic_key)
             await runner.run(run_id, request.problem)
             break
 
