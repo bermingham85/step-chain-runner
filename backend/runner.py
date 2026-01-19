@@ -430,7 +430,12 @@ Provide a clear, concise final answer to the original problem (max 500 words).""
         }
         
         try:
-            final_state = await graph.ainvoke(initial_state)
+            # Increase recursion limit for complex problems
+            # Each step involves: execute_step -> verify_step -> (continue)
+            # With 5 steps, we need at least 5*2 + 3 (plan + final) = 13 iterations
+            # Setting to 50 gives ample headroom
+            config = {"recursion_limit": 50}
+            final_state = await graph.ainvoke(initial_state, config=config)
             
             # Save final state to database (with truncation)
             try:
