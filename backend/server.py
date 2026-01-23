@@ -141,10 +141,7 @@ async def get_run_status(
     )
 
 @app.get("/api/runs/{run_id}/events")
-async def stream_run_events(
-    run_id: str,
-    session: AsyncSession = Depends(get_session)
-):
+async def stream_run_events(run_id: str):
     """
     Stream real-time events for a run via Server-Sent Events (SSE).
     
@@ -159,56 +156,61 @@ async def stream_run_events(
     """
     
     async def event_generator():
-        # Check if run exists
-        result = await session.execute(
-            select(Run).where(Run.run_id == run_id)
-        )
-        run = result.scalar_one_or_none()
-        
-        if not run:
-            yield {
-                "event": "error",
-                "data": '{"error": "Run not found"}'
-            }
-            return
-        
-        last_event_id = 0
-        
-        while True:
-            # Fetch new events
-            result = await session.execute(
-                select(DBEvent)
-                .where(DBEvent.run_id == run_id)
-                .where(DBEvent.id > last_event_id)
-                .order_by(DBEvent.id)
-            )
-            events = result.scalars().all()
-            
-            for event in events:
-                import json
-                event_data = {
-                    "ts": event.ts.isoformat(),
-                    "type": event.type,
-                    "data": event.data
-                }
-                yield {
-                    "event": "message",
-                    "data": json.dumps(event_data)
-                }
-                last_event_id = event.id
-            
-            # Check if run is complete
+        # Use a new session for the generator to avoid session conflicts
+        async with async_session_maker() as session:
+            # Check if run exists
             result = await session.execute(
                 select(Run).where(Run.run_id == run_id)
             )
-            run = result.scalar_one()
+            run = result.scalar_one_or_none()
             
-            if run.status in ["completed", "failed"]:
-                # Send final status and close connection
-                break
+            if not run:
+                yield {
+                    "event": "error",
+                    "data": '{"error": "Run not found"}'
+                }
+                return
             
-            # Wait before polling again
-            await asyncio.sleep(0.5)
+            last_event_id = 0
+            timeout_counter = 0
+            max_timeout = 300  # 5 minutes max wait
+            
+            while timeout_counter < max_timeout:
+                # Fetch new events
+                result = await session.execute(
+                    select(DBEvent)
+                    .where(DBEvent.run_id == run_id)
+                    .where(DBEvent.id > last_event_id)
+                    .order_by(DBEvent.id)
+                )
+                events = result.scalars().all()
+                
+                for event in events:
+                    import json
+                    event_data = {
+                        "ts": event.ts.isoformat(),
+                        "type": event.type,
+                        "data": event.data
+                    }
+                    yield {
+                        "event": "message",
+                        "data": json.dumps(event_data)
+                    }
+                    last_event_id = event.id
+                
+                # Check if run is complete
+                result = await session.execute(
+                    select(Run).where(Run.run_id == run_id)
+                )
+                run = result.scalar_one()
+                
+                if run.status in ["completed", "failed"]:
+                    # Send final status and close connection
+                    break
+                
+                # Wait before polling again
+                await asyncio.sleep(0.5)
+                timeout_counter += 0.5
     
     return EventSourceResponse(event_generator())
 
