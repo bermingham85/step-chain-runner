@@ -1,14 +1,24 @@
 import asyncio
 import uuid
+import os
+import logging
 from datetime import datetime
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, HTTPException
+from dotenv import load_dotenv
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
-from database import init_db, get_session, Run, Event as DBEvent
+# Load environment variables
+load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+from database import init_db, get_session, async_session_maker, Run, Event as DBEvent
 from models import CreateRunRequest, CreateRunResponse, RunStatus
 from runner import StepChainRunner
 
