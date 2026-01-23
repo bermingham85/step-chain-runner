@@ -28,9 +28,14 @@ class StepChainRunner:
     
     def __init__(self, session: AsyncSession):
         self.session = session
+        anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+        if not anthropic_key:
+            raise ValueError("ANTHROPIC_API_KEY environment variable is required")
+        
         self.model = ChatAnthropic(
-            model=os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022"),
-            api_key=os.getenv("ANTHROPIC_API_KEY")
+            model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929"),
+            anthropic_api_key=anthropic_key,
+            max_tokens=4096
         )
     
     async def emit_event(self, run_id: str, event_type: str, data: dict):
