@@ -303,7 +303,9 @@ Provide a clear, concise final answer to the original problem."""
         }
         
         try:
-            final_state = await graph.ainvoke(initial_state)
+            # Increase recursion limit for complex problems
+            config = {"recursion_limit": 50}
+            final_state = await graph.ainvoke(initial_state, config=config)
             
             # Save final state to database
             await self.update_run(
