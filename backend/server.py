@@ -58,6 +58,7 @@ async def root():
 @app.post("/api/runs", response_model=CreateRunResponse)
 async def create_run(
     request: CreateRunRequest,
+    bg_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session)
 ):
     """
@@ -66,6 +67,7 @@ async def create_run(
     The run will be queued and processed asynchronously.
     """
     run_id = str(uuid.uuid4())
+    logger.info(f"[RUN {run_id}] Creating new run for problem: {request.problem[:50]}...")
     
     # Create run in database
     run = Run(
@@ -75,18 +77,41 @@ async def create_run(
     )
     session.add(run)
     await session.commit()
+    logger.info(f"[RUN {run_id}] Run created in database")
     
-    # Start background task
-    async def run_task():
-        async for session_inner in get_session():
-            runner = StepChainRunner(session_inner)
-            await runner.run(run_id, request.problem)
-            break
-    
-    task = asyncio.create_task(run_task())
-    background_tasks[run_id] = task
+    # Schedule background task with FastAPI's BackgroundTasks
+    bg_tasks.add_task(run_chain, run_id, request.problem)
+    logger.info(f"[RUN {run_id}] Background task scheduled")
     
     return CreateRunResponse(run_id=run_id)
+
+async def run_chain(run_id: str, problem: str):
+    """Background task to run the chain."""
+    logger.info(f"[RUN {run_id}] Starting background task...")
+    try:
+        async with async_session_maker() as session:
+            logger.info(f"[RUN {run_id}] Session created, initializing runner...")
+            runner = StepChainRunner(session)
+            logger.info(f"[RUN {run_id}] Runner initialized, starting execution...")
+            await runner.run(run_id, problem)
+            logger.info(f"[RUN {run_id}] Runner completed successfully")
+    except Exception as e:
+        logger.error(f"[RUN {run_id}] ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        # Try to update run status to failed
+        try:
+            async with async_session_maker() as session:
+                result = await session.execute(
+                    select(Run).where(Run.run_id == run_id)
+                )
+                run = result.scalar_one_or_none()
+                if run:
+                    run.status = "failed"
+                    run.error = str(e)
+                    await session.commit()
+        except Exception as e2:
+            logger.error(f"[RUN {run_id}] Failed to update error status: {e2}")
 
 @app.get("/api/runs/{run_id}", response_model=RunStatus)
 async def get_run_status(
